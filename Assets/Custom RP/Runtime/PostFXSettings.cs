@@ -23,7 +23,8 @@ public class PostFXSettings :ScriptableObject
         }
     }
 
-    // Bloom Start-----------------------------
+    //----------------------------------------
+    
     [System.Serializable]
     public struct BloomSettings
     {
@@ -51,10 +52,8 @@ public class PostFXSettings :ScriptableObject
 
     public BloomSettings Bloom => bloom;
     
-    //Bloom End--------------------------------
+    //-----------------------------------------
     
-    //ReduceColor Start---------------------------------
-
     [System.Serializable]
     public struct ReduceColorSettings
     {
@@ -70,6 +69,30 @@ public class PostFXSettings :ScriptableObject
     
     public ReduceColorSettings ReduceColor => reduceColor;
     
-    //ReduceColor End-----------------------------------
+    //-------------------------------------------------------
+
+    public enum DitherMode
+    {
+        Bayer2x2,
+        Bayer4x4,
+        Bayer8x8
+    };
     
+    [System.Serializable]
+    public struct DitherBayerSettings
+    {
+        [Range(0f, 1f)]
+        public float grayScale;
+        
+        public DitherMode ditherMode;
+    }
+
+    [SerializeField]
+    private DitherBayerSettings ditherBayer = new DitherBayerSettings
+    {
+        ditherMode = DitherMode.Bayer2x2
+    };
+    
+    public  DitherBayerSettings DitherBayer => ditherBayer;
+
 }

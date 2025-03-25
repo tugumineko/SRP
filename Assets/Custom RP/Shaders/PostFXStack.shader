@@ -77,7 +77,23 @@
         
         Pass
         {
-            Name "ReduceColor"
+            Name "Dither Bayer"
+            
+            HLSLPROGRAM
+
+            #pragma target 3.5
+            #pragma multi_compile _ _BAYER4 _BAYER8
+            #pragma vertex DefaultPassVertex
+            #pragma fragment DitherBayerPassFragment 
+            
+            ENDHLSL
+            
+            
+        }
+
+        Pass
+        {
+            Name "Reduce Color"
             
             HLSLPROGRAM
 

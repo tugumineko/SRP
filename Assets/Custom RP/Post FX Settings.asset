@@ -18,5 +18,11 @@ MonoBehaviour:
     downscaleLimit: 1
     bicubicUpsampling: 1
     threshold: 0.5
-    thresholdKnee: 0.5
-    intensity: 0.3
+    thresholdKnee: 0.279
+    intensity: 1
+  reduceColor:
+    discreteLevel: 2
+    grayScale: 1
+  ditherBayer:
+    grayScale: 0
+    ditherMode: 2

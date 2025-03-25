@@ -10,8 +10,6 @@ real4 unity_WorldTransformParams;
 real4 unity_LightData;
 real4 unity_LightIndices[2];
 
-float3 _WorldSpaceCameraPos;
-
 float4 unity_ProbesOcclusion;
 
 float4 unity_SpecCube0_HDR;
@@ -37,6 +35,8 @@ CBUFFER_END
 float4x4 unity_MatrixVP;
 float4x4 unity_MatrixV;
 float4x4 glstate_matrix_projection;
+
+float3 _WorldSpaceCameraPos;
 
 float4 _ProjectionParams;
 

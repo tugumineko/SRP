@@ -23,6 +23,7 @@ public partial class PostFXStack
         BloomCombine,
         BloomPrefilter,
         Copy,
+        DitherBayer,
         ReduceColor
     }
     
@@ -34,7 +35,15 @@ public partial class PostFXStack
     int fxSource2Id = Shader.PropertyToID("_PostFXSource2");
     
     int discreteLevelId  =  Shader.PropertyToID("_DiscreteLevel");
-    int grayScaleId = Shader.PropertyToID("_GrayScale");
+    int reduceColorGrayScaleId = Shader.PropertyToID("_ReduceColorGrayScale");
+    
+    int ditherBayerGrayScaleId = Shader.PropertyToID("_DitherBayerGrayScale");
+    
+    private static string[] ditherBayerKeywords =
+    {
+        "_BAYER4",
+        "_BAYER8"
+    };
     
     private const int maxBloomPyramidLevels = 16;
 
@@ -135,9 +144,19 @@ public partial class PostFXStack
         buffer.BeginSample("ReduceColor");
         PostFXSettings.ReduceColorSettings reduceColor = settings.ReduceColor;
         buffer.SetGlobalInt(discreteLevelId,reduceColor.discreteLevel);
-        buffer.SetGlobalFloat(grayScaleId,reduceColor.grayScale);
+        buffer.SetGlobalFloat(reduceColorGrayScaleId,reduceColor.grayScale);
         Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.ReduceColor);
         buffer.EndSample("ReduceColor");
+    }
+
+    void DoDitherBayer(int sourceId)
+    {
+        buffer.BeginSample("DitherBayer");
+        PostFXSettings.DitherBayerSettings ditherBayerSettings = settings.DitherBayer;
+        buffer.SetGlobalFloat(ditherBayerGrayScaleId,ditherBayerSettings.grayScale);
+        SetKeywords(ditherBayerKeywords,(int)ditherBayerSettings.ditherMode - 1);
+        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.DitherBayer);
+        buffer.EndSample("DitherBayer");
     }
     
     public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings)
@@ -151,7 +170,8 @@ public partial class PostFXStack
     public void Render(int sourceId)
     {
         //DoBloom(sourceId);
-        DoReduceColor(sourceId);
+        //DoReduceColor(sourceId);
+        DoDitherBayer(sourceId);
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();
     }
@@ -164,6 +184,21 @@ public partial class PostFXStack
             Matrix4x4.identity, settings.Material,(int)pass,
             MeshTopology.Triangles, 3
             );
+    }
+    
+    void SetKeywords(string[] keywords, int enabledIndex)
+    {
+        for (int i = 0; i < keywords.Length; i++)
+        {
+            if (i == enabledIndex)
+            {
+                buffer.EnableShaderKeyword(keywords[i]);
+            }
+            else
+            {
+                buffer.DisableShaderKeyword(keywords[i]);
+            }
+        }
     }
     
 }
