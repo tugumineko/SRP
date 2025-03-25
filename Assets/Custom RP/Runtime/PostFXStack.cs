@@ -20,9 +20,10 @@ public partial class PostFXStack
     {
         BloomHorizontal,
         BloomVertical,
+        BloomCombine,
         BloomPrefilter,
         Copy,
-        Combine
+        ReduceColor
     }
     
     int bloomPrefilterId = Shader.PropertyToID("_BloomPrefilter");
@@ -31,6 +32,9 @@ public partial class PostFXStack
     int bloomBicubicUpsamplingId = Shader.PropertyToID("_BloomBicubicUpsampling");
     int fxSourceId = Shader.PropertyToID("_PostFXSource");
     int fxSource2Id = Shader.PropertyToID("_PostFXSource2");
+    
+    int discreteLevelId  =  Shader.PropertyToID("_DiscreteLevel");
+    int grayScaleId = Shader.PropertyToID("_GrayScale");
     
     private const int maxBloomPyramidLevels = 16;
 
@@ -108,7 +112,7 @@ public partial class PostFXStack
             for (i -= 1; i > 0; i--)
             {
                 buffer.SetGlobalTexture(fxSource2Id, toId + 1);
-                Draw(fromId, toId, Pass.Combine);
+                Draw(fromId, toId, Pass.BloomCombine);
                 buffer.ReleaseTemporaryRT(fromId);
                 buffer.ReleaseTemporaryRT(toId + 1);
                 fromId = toId;
@@ -121,9 +125,19 @@ public partial class PostFXStack
         }
         buffer.SetGlobalFloat(bloomIntensityId, bloom.intensity);
         buffer.SetGlobalTexture(fxSource2Id,sourceId);
-        Draw(fromId,BuiltinRenderTextureType.CameraTarget, Pass.Combine);
+        Draw(fromId,BuiltinRenderTextureType.CameraTarget, Pass.BloomCombine);
         buffer.ReleaseTemporaryRT(fromId);
         buffer.EndSample("Bloom");
+    }
+
+    void DoReduceColor(int sourceId)
+    {
+        buffer.BeginSample("ReduceColor");
+        PostFXSettings.ReduceColorSettings reduceColor = settings.ReduceColor;
+        buffer.SetGlobalInt(discreteLevelId,reduceColor.discreteLevel);
+        buffer.SetGlobalFloat(grayScaleId,reduceColor.grayScale);
+        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.ReduceColor);
+        buffer.EndSample("ReduceColor");
     }
     
     public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings)
@@ -136,7 +150,8 @@ public partial class PostFXStack
 
     public void Render(int sourceId)
     {
-        DoBloom(sourceId);
+        //DoBloom(sourceId);
+        DoReduceColor(sourceId);
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();
     }

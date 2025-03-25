@@ -10,16 +10,6 @@ SAMPLER(sampler_linear_clamp);
 
 float4 _PostFXSource_TexelSize;
 
-struct Varyings
-{
-    float4 positionCS : SV_POSITION;
-    float2 screenUV : VAR_SCREEN_UV;
-};
-
-bool _BloomBicubicUpsampling;
-float4 _BloomThreshold;
-float _BloomIntensity;
-
 float4 GetSource(float2 screenUV)
 {
     return SAMPLE_TEXTURE2D_LOD(_PostFXSource, sampler_linear_clamp, screenUV,0);
@@ -42,6 +32,12 @@ float4 GetSourceBicubic(float2 screenUV)
         );
 }
 
+struct Varyings
+{
+    float4 positionCS : SV_POSITION;
+    float2 screenUV : VAR_SCREEN_UV;
+};
+
 Varyings DefaultPassVertex(uint vertexID : SV_VertexID)
 {
     Varyings output;
@@ -61,11 +57,15 @@ Varyings DefaultPassVertex(uint vertexID : SV_VertexID)
     return output;
 }
 
+bool _BloomBicubicUpsampling;
+float4 _BloomThreshold;
+float _BloomIntensity;
+
 float4 CopyPassFragment(Varyings input) : SV_TARGET {
     return GetSource(input.screenUV);
 }
 
-float4 CombinePassFragment(Varyings input) : SV_TARGET {
+float4 BloomCombinePassFragment(Varyings input) : SV_TARGET {
     float3 lowRes;
     if (_BloomBicubicUpsampling)
     {
@@ -126,6 +126,21 @@ float4 BloomPrefilterPassFragment(Varyings input) : SV_TARGET {
     float3 color = ApplyBloomThreshold(GetSource(input.screenUV).rgb);
     return float4(color,1.0);
 }
+
+int _DiscreteLevel;
+float _GrayScale; 
+
+float4 ReduceColorPassFragment(Varyings input) : SV_TARGET {
+    float3 base = GetSource(input.screenUV).rgb;
+    float brightness = 0.2125 * base.r + 0.7154 * base.g + 0.0721 * base.b;
+    brightness = floor(brightness * 256 / (256 / _DiscreteLevel)) * (256 / _DiscreteLevel) / 256;  //这个地方不能合并或者化简
+    float3 grayColor = float3(brightness,brightness,brightness);
+    base.r = floor(base.r * 256 / (256 / _DiscreteLevel)) * (256 / _DiscreteLevel) / 256;
+    base.g = floor(base.g * 256 / (256 / _DiscreteLevel)) * (256 / _DiscreteLevel) / 256;
+    base.b = floor(base.b * 256 / (256 / _DiscreteLevel)) * (256 / _DiscreteLevel) / 256;
+    return float4(lerp(base,grayColor,_GrayScale),1.0);
+}
+
 
 
 #endif

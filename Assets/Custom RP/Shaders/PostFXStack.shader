@@ -11,8 +11,6 @@
         #include "PostFXStackPasses.hlsl"
         ENDHLSL
 
-
-
         Pass
         {
             Name "Bloom Horizontal"
@@ -33,6 +31,18 @@
                 #pragma target 3.5
                 #pragma vertex DefaultPassVertex
                 #pragma fragment BloomVerticalPassFragment
+            ENDHLSL
+            
+        }
+
+        Pass
+        {
+            Name "Bloom Combine"
+            
+            HLSLPROGRAM
+                #pragma target 3.5
+                #pragma vertex DefaultPassVertex
+                #pragma fragment BloomCombinePassFragment
             ENDHLSL
             
         }
@@ -64,19 +74,20 @@
             ENDHLSL     
             
         }
-
+        
         Pass
         {
-            Name "Combine"
+            Name "ReduceColor"
             
             HLSLPROGRAM
-                #pragma target 3.5
-                #pragma vertex DefaultPassVertex
-                #pragma fragment CombinePassFragment
+
+            #pragma target 3.5
+            #pragma vertex DefaultPassVertex
+            #pragma fragment ReduceColorPassFragment 
+
             ENDHLSL
-            
         }
-        
+
     }
     
     

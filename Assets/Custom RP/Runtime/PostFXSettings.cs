@@ -23,6 +23,7 @@ public class PostFXSettings :ScriptableObject
         }
     }
 
+    // Bloom Start-----------------------------
     [System.Serializable]
     public struct BloomSettings
     {
@@ -49,4 +50,26 @@ public class PostFXSettings :ScriptableObject
     BloomSettings bloom = default;
 
     public BloomSettings Bloom => bloom;
+    
+    //Bloom End--------------------------------
+    
+    //ReduceColor Start---------------------------------
+
+    [System.Serializable]
+    public struct ReduceColorSettings
+    {
+        [Range(1f, 256f)]
+        public int discreteLevel;
+
+        [Range(0f, 1f)]
+        public float grayScale;
+    }
+    
+    [SerializeField]
+    ReduceColorSettings reduceColor = default;
+    
+    public ReduceColorSettings ReduceColor => reduceColor;
+    
+    //ReduceColor End-----------------------------------
+    
 }
