@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor.Experimental.GraphView;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 public partial class PostFXStack
@@ -169,9 +170,14 @@ public partial class PostFXStack
 
     public void Render(int sourceId)
     {
-        //DoBloom(sourceId);
-        //DoReduceColor(sourceId);
-        DoDitherBayer(sourceId);
+        if(settings.PostFX.type == PostFXSettings.PostFXType.None)
+            Draw(sourceId, BuiltinRenderTextureType.CameraTarget,Pass.Copy);
+        else if(settings.PostFX.type == PostFXSettings.PostFXType.Bloom)
+            DoBloom(sourceId);
+        else if(settings.PostFX.type == PostFXSettings.PostFXType.ReduceColor)
+            DoReduceColor(sourceId);
+        else if(settings.PostFX.type == PostFXSettings.PostFXType.DitherBayer)
+            DoDitherBayer(sourceId);
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();
     }

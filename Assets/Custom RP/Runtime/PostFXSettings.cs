@@ -23,6 +23,25 @@ public class PostFXSettings :ScriptableObject
         }
     }
 
+    public enum PostFXType
+    {
+        None,
+        Bloom,
+        ReduceColor,
+        DitherBayer
+    }
+    
+    [System.Serializable]
+    public class PostFXOptions
+    {
+        public PostFXType type;
+    }
+    
+    [SerializeField]
+    PostFXOptions postFX = default;
+    
+    public PostFXOptions PostFX => postFX;
+    
     //----------------------------------------
     
     [System.Serializable]
