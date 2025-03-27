@@ -30,7 +30,10 @@ public partial class PostFXStack
         BloomPrefilterFireflies,
         Copy,
         DitherBayer,
-        ReduceColor
+        ReduceColor,
+        ToneMappingACES,
+        ToneMappingNeutral,
+        ToneMappingReinhard
     }
     
     int bloomPrefilterId = Shader.PropertyToID("_BloomPrefilter");
@@ -168,7 +171,9 @@ public partial class PostFXStack
 
     void DoToneMapping(int sourceId)
     {
-        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
+        PostFXSettings.ToneMappingSettings.Mode mode = settings.ToneMapping.mode;
+        Pass pass = mode < 0 ? Pass.Copy : Pass.ToneMappingACES + (int)mode;
+        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, pass);
     }
     
     void DoReduceColor(int sourceId)
@@ -182,7 +187,7 @@ public partial class PostFXStack
             postFXResultId, camera.pixelWidth, camera.pixelHeight, 0,
             FilterMode.Bilinear, format
         );
-        Draw(sourceId, postFXResultId, Pass.ReduceColor);
+        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.ReduceColor);
         buffer.EndSample("ReduceColor");
     }
 
@@ -197,7 +202,7 @@ public partial class PostFXStack
             postFXResultId, camera.pixelWidth, camera.pixelHeight, 0,
             FilterMode.Bilinear, format
         );
-        Draw(sourceId, postFXResultId, Pass.DitherBayer);
+        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.DitherBayer);
         buffer.EndSample("DitherBayer");
     }
     
@@ -212,20 +217,22 @@ public partial class PostFXStack
 
     public void Render(int sourceId)
     {
-        bool toneMapping = true;
         if (settings.PostFX.type == PostFXSettings.PostFXType.None)
         {
             buffer.GetTemporaryRT(
                 postFXResultId, camera.pixelWidth, camera.pixelHeight, 0,
                 FilterMode.Bilinear, useHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default
             );
-            Draw(sourceId, postFXResultId, Pass.Copy);
+            Draw(sourceId,postFXResultId, Pass.Copy);
+            DoToneMapping(postFXResultId);
+            buffer.ReleaseTemporaryRT(postFXResultId);
         }
         else if (settings.PostFX.type == PostFXSettings.PostFXType.Bloom)
         {
-            if (!DoBloom(sourceId))
+            if (DoBloom(sourceId))
             {
-                toneMapping = false;
+                DoToneMapping(postFXResultId);
+                buffer.ReleaseTemporaryRT(postFXResultId);
             }
         }
         else if (settings.PostFX.type == PostFXSettings.PostFXType.ReduceColor)
@@ -235,12 +242,6 @@ public partial class PostFXStack
         else if (settings.PostFX.type == PostFXSettings.PostFXType.DitherBayer)
         {
             DoDitherBayer(sourceId);
-        }
-
-        if (toneMapping)
-        {
-            DoToneMapping(postFXResultId);
-            buffer.ReleaseTemporaryRT(postFXResultId);
         }
         
         context.ExecuteCommandBuffer(buffer);
