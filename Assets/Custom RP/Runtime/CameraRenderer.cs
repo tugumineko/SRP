@@ -6,6 +6,7 @@ public partial class CameraRenderer
 {
     private ScriptableRenderContext context;
     private Camera camera;
+    private bool useHDR;
     private const String bufferName = "Render Camera";
     private CommandBuffer buffer = new CommandBuffer()
     {
@@ -20,23 +21,25 @@ public partial class CameraRenderer
     
     static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
     
-    public void Render(ScriptableRenderContext context, Camera camera,bool useDynamicBatching,bool useGPUInstancing,bool useLightsPerObject,ShadowSettings shadowSettings ,PostFXSettings postFXSettings)
+    public void Render(ScriptableRenderContext context, Camera camera,bool allowHDR,bool useDynamicBatching,bool useGPUInstancing,bool useLightsPerObject,ShadowSettings shadowSettings ,PostFXSettings postFXSettings)
     {
         this.context = context;
         this.camera = camera;
         
         PrepareBuffer();
         PrepareForSceneWindow();
-
+        
         if (!Cull(shadowSettings.maxDistance))
         {
             return;
         }
         
+        useHDR = allowHDR && camera.allowHDR;
+        
         buffer.BeginSample(SampleName);
         ExecuteBuffer();
         lighting.Setup(context,cullingResults,shadowSettings,useLightsPerObject);
-        postFXStack.Setup(context,camera,postFXSettings);
+        postFXStack.Setup(context,camera,postFXSettings,useHDR);
         buffer.EndSample(SampleName);
         Setup();
         DrawVisibleGeometry(useDynamicBatching,useGPUInstancing,useLightsPerObject);

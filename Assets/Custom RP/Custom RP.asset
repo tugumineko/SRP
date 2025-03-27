@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569173c16d41c1a469a191f36ff4cd74, type: 3}
   m_Name: Custom RP
   m_EditorClassIdentifier: 
+  allowHDR: 1
   useDynamicBatching: 1
   useGPUInstancing: 1
   useSRPBatcher: 1
   useLightsPerObject: 1
   shadows:
-    maxDistance: 331
+    maxDistance: 20
     distanceFade: 0.1
     directional:
       atlasSize: 1024

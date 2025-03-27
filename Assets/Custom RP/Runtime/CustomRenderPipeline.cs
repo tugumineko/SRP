@@ -7,6 +7,7 @@ public partial class CustomRenderPipeline : RenderPipeline
 {
     private CameraRenderer renderer = new CameraRenderer();
 
+    private bool allowHDR;
     private bool useDynamicBatching;
     private bool useGPUInstancing;
     private bool useSRPBatcher;
@@ -14,8 +15,9 @@ public partial class CustomRenderPipeline : RenderPipeline
     private ShadowSettings shadowSettings;
     private PostFXSettings postFXSettings;
     
-    public CustomRenderPipeline(bool useDynamicBatching,bool useGPUInstancing,bool useSRPBatcher,bool useLightPerObject,ShadowSettings shadowSettings,PostFXSettings postFXSettings)
+    public CustomRenderPipeline(bool allowHDR,bool useDynamicBatching,bool useGPUInstancing,bool useSRPBatcher,bool useLightPerObject,ShadowSettings shadowSettings,PostFXSettings postFXSettings)
     {
+        this.allowHDR = allowHDR;
         this.shadowSettings = shadowSettings;
         this.postFXSettings = postFXSettings;
         GraphicsSettings.useScriptableRenderPipelineBatching = useSRPBatcher;
@@ -36,7 +38,7 @@ public partial class CustomRenderPipeline : RenderPipeline
     {
         foreach (Camera camera in cameras)
         {
-            renderer.Render(context, camera, useDynamicBatching, useGPUInstancing,useLightsPerObject,shadowSettings,postFXSettings);
+            renderer.Render(context, camera,allowHDR, useDynamicBatching, useGPUInstancing,useLightsPerObject,shadowSettings,postFXSettings);
         }
     }
 }
