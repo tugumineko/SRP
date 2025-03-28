@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shader: {fileID: 4800000, guid: 229568c22ee041dc9557999797d79bed, type: 3}
   postFX:
-    type: 1
+    type: 4
   toneMapping:
     mode: 0
   bloom:
@@ -33,3 +33,5 @@ MonoBehaviour:
   ditherBayer:
     grayScale: 1
     ditherMode: 2
+  halftone:
+    tileSize: 9

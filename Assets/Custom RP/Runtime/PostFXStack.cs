@@ -29,27 +29,30 @@ public partial class PostFXStack
         BloomPrefilter,
         BloomPrefilterFireflies,
         Copy,
-        DitherBayer,
         ReduceColor,
+        DitherBayer,
+        HalftonePattern,
         ToneMappingACES,
         ToneMappingNeutral,
         ToneMappingReinhard
     }
-    
-    int bloomPrefilterId = Shader.PropertyToID("_BloomPrefilter");
-    int bloomThresholdId = Shader.PropertyToID("_BloomThreshold");
-    int bloomIntensityId = Shader.PropertyToID("_BloomIntensity");
-    int bloomBicubicUpsamplingId = Shader.PropertyToID("_BloomBicubicUpsampling");
     
     int postFXResultId = Shader.PropertyToID("_PostFXResult");
     
     int fxSourceId = Shader.PropertyToID("_PostFXSource");
     int fxSource2Id = Shader.PropertyToID("_PostFXSource2");
     
+    int bloomPrefilterId = Shader.PropertyToID("_BloomPrefilter");
+    int bloomThresholdId = Shader.PropertyToID("_BloomThreshold");
+    int bloomIntensityId = Shader.PropertyToID("_BloomIntensity");
+    int bloomBicubicUpsamplingId = Shader.PropertyToID("_BloomBicubicUpsampling");
+    
     int discreteLevelId  =  Shader.PropertyToID("_DiscreteLevel");
     int reduceColorGrayScaleId = Shader.PropertyToID("_ReduceColorGrayScale");
     
     int ditherBayerGrayScaleId = Shader.PropertyToID("_DitherBayerGrayScale");
+    
+    int halftoneTileSizeInverseId = Shader.PropertyToID("_HalftoneTileSizeInverse");
     
     private static string[] ditherBayerKeywords =
     {
@@ -178,32 +181,36 @@ public partial class PostFXStack
     
     void DoReduceColor(int sourceId)
     {
-        RenderTextureFormat format = useHDR ? RenderTextureFormat.DefaultHDR :  RenderTextureFormat.Default;
         buffer.BeginSample("ReduceColor");
         PostFXSettings.ReduceColorSettings reduceColor = settings.ReduceColor;
         buffer.SetGlobalInt(discreteLevelId,reduceColor.discreteLevel);
         buffer.SetGlobalFloat(reduceColorGrayScaleId,reduceColor.grayScale);
-        buffer.GetTemporaryRT(
-            postFXResultId, camera.pixelWidth, camera.pixelHeight, 0,
-            FilterMode.Bilinear, format
-        );
         Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.ReduceColor);
         buffer.EndSample("ReduceColor");
     }
-
+    
     void DoDitherBayer(int sourceId)
     {
-        RenderTextureFormat format = useHDR ? RenderTextureFormat.DefaultHDR :  RenderTextureFormat.Default;
         buffer.BeginSample("DitherBayer");
         PostFXSettings.DitherBayerSettings ditherBayerSettings = settings.DitherBayer;
         buffer.SetGlobalFloat(ditherBayerGrayScaleId,ditherBayerSettings.grayScale);
         SetKeywords(ditherBayerKeywords,(int)ditherBayerSettings.ditherMode - 1);
+        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.DitherBayer);
+        buffer.EndSample("DitherBayer");
+    }
+
+    void DoHalftone(int sourceId)
+    {
+        RenderTextureFormat format = useHDR ? RenderTextureFormat.DefaultHDR :  RenderTextureFormat.Default;
+        buffer.BeginSample("Halftone");
+        PostFXSettings.HalftoneSettings halftoneSettings = settings.Halftone;
+        buffer.SetGlobalFloat(halftoneTileSizeInverseId, 1 / (float)halftoneSettings.tileSize);
         buffer.GetTemporaryRT(
             postFXResultId, camera.pixelWidth, camera.pixelHeight, 0,
             FilterMode.Bilinear, format
         );
-        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.DitherBayer);
-        buffer.EndSample("DitherBayer");
+        Draw(sourceId,postFXResultId, Pass.HalftonePattern);
+        buffer.EndSample("Halftone");
     }
     
     public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings, bool useHDR)
@@ -243,7 +250,12 @@ public partial class PostFXStack
         {
             DoDitherBayer(sourceId);
         }
-        
+        else if (settings.PostFX.type == PostFXSettings.PostFXType.Halftone)
+        {
+            DoHalftone(sourceId);
+            DoToneMapping(postFXResultId);
+            buffer.ReleaseTemporaryRT(postFXResultId);
+        }
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();
     }

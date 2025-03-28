@@ -28,7 +28,8 @@ public class PostFXSettings :ScriptableObject
         None,
         Bloom,
         ReduceColor,
-        DitherBayer
+        DitherBayer,
+        Halftone
     }
     
     [System.Serializable]
@@ -134,6 +135,7 @@ public class PostFXSettings :ScriptableObject
         public float grayScale;
         
         public DitherMode ditherMode;
+        
     }
 
     [SerializeField]
@@ -144,4 +146,17 @@ public class PostFXSettings :ScriptableObject
     
     public  DitherBayerSettings DitherBayer => ditherBayer;
 
+    //-------------------------------------------------------
+
+    [System.Serializable]
+    public struct HalftoneSettings
+    {
+        [Range(1f, 100f)]
+        public int tileSize;
+    }
+    
+    [SerializeField]
+    HalftoneSettings halftone = default;
+
+    public HalftoneSettings Halftone => halftone;
 }

@@ -117,6 +117,19 @@
         
         Pass
         {
+            Name "Reduce Color"
+            
+            HLSLPROGRAM
+
+            #pragma target 3.5
+            #pragma vertex DefaultPassVertex
+            #pragma fragment ReduceColorPassFragment 
+
+            ENDHLSL
+        }
+
+        Pass
+        {
             Name "Dither Bayer"
             
             HLSLPROGRAM
@@ -130,18 +143,20 @@
             
             
         }
-
+        
         Pass
         {
-            Name "Reduce Color"
+            Name "Halftone"
             
             HLSLPROGRAM
 
             #pragma target 3.5
             #pragma vertex DefaultPassVertex
-            #pragma fragment ReduceColorPassFragment 
-
+            #pragma fragment HalftonePassFragment 
+            
             ENDHLSL
+            
+            
         }
 
         Pass

@@ -2,6 +2,7 @@
 #define CUSTOM_POST_FX_PASSES_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
+#include "../ShaderLibrary/Common.hlsl"
 
 TEXTURE2D(_PostFXSource);
 TEXTURE2D(_PostFXSource2);
@@ -251,7 +252,7 @@ float DitherBayer8x8(int x, int y, float brightness)
 float4 DitherBayerPassFragment(Varyings input) : SV_TARGET {
     float2 screenPos = input.screenUV * GetSourceTexelSize().zw;
     float3 color = GetSource(input.screenUV).rgb;
-    int brightness  = (uint)(Luminance(color) * 256) >> (uint)DECREASE_SCALE;
+    int brightness  = (uint)(Luminance(color) * 256) >> DECREASE_SCALE;
     int colorR = (uint)(color.r * 256) >> DECREASE_SCALE;
     int colorG = (uint)(color.g * 256) >> DECREASE_SCALE;
     int colorB = (uint)(color.b * 256) >> DECREASE_SCALE;
@@ -269,6 +270,38 @@ float4 DitherBayerPassFragment(Varyings input) : SV_TARGET {
 }
 
 //--------------------------------------------------------------------
+
+float _HalftoneTileSizeInverse;
+
+float DrawTilingDisc(float2 uv, float2 tiling, float scale, float offset)
+{
+    float2 uvTiled = uv * tiling;
+    float row = floor(uvTiled.y);
+    uvTiled.x += row * offset;
+    uvTiled = frac(uvTiled);
+    uvTiled -= 0.5;
+    float sdf = length(uvTiled);
+    return AntialiasingStep(sdf, scale);
+
+}
+
+float4 HalftonePassFragment(Varyings input) : SV_TARGET {
+    float2 tileNum = GetSourceTexelSize().zw  * _HalftoneTileSizeInverse;
+
+    float2 uvTiled = input.screenUV * tileNum;
+    float row = floor(uvTiled.y);
+    float attenuation = _HalftoneTileSizeInverse > 0.0333 ?   0 : saturate(1.0 - _HalftoneTileSizeInverse);
+    uvTiled.x += row *  attenuation;
+    float2 mosaicUV = ceil(uvTiled) / tileNum;
+    float3 mosaicColor = GetSource(mosaicUV).rgb;
+
+    float grey = Luminance(GetSource(mosaicUV).rgb);
+    float round = DrawTilingDisc(input.screenUV,tileNum,0.4 * grey + 0.15 + _HalftoneTileSizeInverse, attenuation);
+    
+    return float4( round * mosaicColor ,1.0);
+}
+
+//---------------------------------------------------------------------
 
 float4 ToneMappingACESPassFragment(Varyings input) : SV_TARGET {
     float4 color = GetSource(input.screenUV);

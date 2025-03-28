@@ -55,4 +55,21 @@ float3 NormalTangentToWorld(float3 normalTS,float3 normalWS,float4 tangentWS)
     return TransformTangentToWorld(normalTS,tangentToWorld);
 }
 
+real2 Rotate(real2 uv, real2 center, real rotation)
+{
+    real sin_rad = sin(rotation);
+    real cos_rad = cos(rotation);
+    real2x2 rotation_matrix = real2x2(cos_rad,sin_rad,-sin_rad,cos_rad);
+    //uv -= center;
+    uv = mul(rotation_matrix,uv);
+    //uv += center;
+    return uv;
+}
+
+real AntialiasingStep(real a, real b)
+{
+    real c = b - a;
+    return saturate( c / (abs(ddx(c)) + abs(ddy(c)) ));
+}
+
  #endif
