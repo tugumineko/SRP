@@ -14,9 +14,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shader: {fileID: 4800000, guid: 229568c22ee041dc9557999797d79bed, type: 3}
   postFX:
-    type: 4
+    type: 0
+  colorAdjustments:
+    postExposure: 1
+    contrast: 0
+    colorFilter: {r: 1, g: 1, b: 1, a: 1}
+    hueShift: 0
+    saturation: 0
+  whiteBalance:
+    temperature: 0
+    tint: 0
+  splitToning:
+    shadows: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    highlights: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    balance: 0
+  channelMixer:
+    red: {x: 1, y: 0, z: 0}
+    green: {x: 0, y: 1, z: 0}
+    blue: {x: 0, y: 0, z: 1}
+  shadowsMidtonesHighlights:
+    shadows: {r: 1, g: 1, b: 1, a: 1}
+    midtones: {r: 1, g: 1, b: 1, a: 1}
+    highlights: {r: 1, g: 1, b: 1, a: 1}
+    shadowsStart: 0
+    shadowsEnd: 0.3
+    highlightsStart: 0.55
+    highLightsEnd: 1
   toneMapping:
-    mode: 0
+    mode: 1
   bloom:
     maxIterations: 2
     downscaleLimit: 1
@@ -34,4 +59,4 @@ MonoBehaviour:
     grayScale: 1
     ditherMode: 2
   halftone:
-    tileSize: 9
+    tileSize: 1
