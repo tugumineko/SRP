@@ -36,16 +36,19 @@ public partial class PostFXStack
         ReduceColor,
         DitherBayer,
         HalftonePattern,
-        ToneMappingNone,
-        ToneMappingACES,
-        ToneMappingNeutral,
-        ToneMappingReinhard
+        ColorGradingNone,
+        ColorGradingACES, 
+        ColorGradingNeutral,
+        ColorGradingReinhard,
+        Final
     }
     
     int postFXResultId = Shader.PropertyToID("_PostFXResult");
     
     int fxSourceId = Shader.PropertyToID("_PostFXSource");
     int fxSource2Id = Shader.PropertyToID("_PostFXSource2");
+    
+    int colorGradingLUTId = Shader.PropertyToID("_ColorGradingLUT");
     
     int bloomPrefilterId = Shader.PropertyToID("_BloomPrefilter");
     int bloomThresholdId = Shader.PropertyToID("_BloomThreshold");
@@ -76,6 +79,8 @@ public partial class PostFXStack
     int smhHighlightsId = Shader.PropertyToID("_SMHHighlights");
     int smhRangeId = Shader.PropertyToID("_SMHRange");
     
+    int colorGradingLUTParametersId = Shader.PropertyToID("_ColorGradingLUTParameters");
+    int colorGradingLUTInLogCId =  Shader.PropertyToID("_ColorGradingLUTInLogC");
     
     private static string[] ditherBayerKeywords =
     {
@@ -247,9 +252,25 @@ public partial class PostFXStack
         ConfigureSplitToning();
         ConfigureChannelMixer();
         ConfigureShadowsMidtonesHighlights();
+
+        
+        int lutHeight = colorLUTResolution;
+        int  lutWidth = lutHeight * lutHeight;
+        buffer.GetTemporaryRT(
+            colorGradingLUTId, lutWidth, lutHeight, 0,
+            FilterMode.Bilinear, RenderTextureFormat.DefaultHDR
+        );
+        buffer.SetGlobalVector(colorGradingLUTParametersId, new Vector4(
+                lutHeight, 0.5f / lutWidth, 0.5f / lutHeight, lutHeight / (lutHeight - 1f)));
         ToneMappingSettings.Mode mode = settings.ToneMapping.mode;
-        Pass pass = Pass.ToneMappingNone + (int)mode;
-        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, pass);
+        Pass pass = Pass.ColorGradingNone + (int)mode;
+        buffer.SetGlobalFloat(colorGradingLUTInLogCId,useHDR && pass != Pass.ColorGradingNone ? 1f : 0f);
+        Draw(sourceId, colorGradingLUTId, pass);
+        buffer.SetGlobalVector(colorGradingLUTParametersId,
+            new Vector4(1f / lutWidth, 1f / lutHeight, lutHeight - 1f)
+        );
+        Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Final);
+        buffer.ReleaseTemporaryRT(colorGradingLUTId);
     }
     
     void DoReduceColor(int sourceId)
