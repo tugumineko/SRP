@@ -17,9 +17,14 @@ public partial class CameraRenderer
     PostFXStack postFXStack = new  PostFXStack();
     
     private static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
-    private static ShaderTagId LitShaderTagId = new ShaderTagId("CustonLit");
+    private static ShaderTagId LitShaderTagId = new ShaderTagId("CustomLit");
     
     static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
+    
+    //---------------------------------------------------------------
+    
+    private DeferredLightConfigurator _deferredLightConfigurator = new DeferredLightConfigurator();
+    
     
     public void Render(ScriptableRenderContext context, Camera camera,bool allowHDR,bool useDynamicBatching,bool useGPUInstancing,bool useLightsPerObject,ShadowSettings shadowSettings ,PostFXSettings postFXSettings,int colorLUTResolution)
     {
@@ -34,24 +39,7 @@ public partial class CameraRenderer
             return;
         }
         
-        useHDR = allowHDR && camera.allowHDR;
-        
-        buffer.BeginSample(SampleName);
-        ExecuteBuffer();
-        lighting.Setup(context,cullingResults,shadowSettings,useLightsPerObject);
-        postFXStack.Setup(context,camera,postFXSettings,useHDR,colorLUTResolution);
-        buffer.EndSample(SampleName);
-        Setup();
-        DrawVisibleGeometry(useDynamicBatching,useGPUInstancing,useLightsPerObject);
-        DrawUnsupportedShader();
-        DrawGizmosBeforeFX();
-        if (postFXStack.isActive)
-        {
-            postFXStack.Render(frameBufferId);
-        }
-        DrawGizmosAfterFX();
-        Cleanup();
-        Submit();
+        //---------------------------------------------
 
     }
 
@@ -103,11 +91,17 @@ public partial class CameraRenderer
         {
             p.shadowDistance = Mathf.Min(maxShadowDistance, camera.farClipPlane);
             cullingResults = context.Cull(ref p);
+            OnPostCameraCulling(ref cullingResults);
             return true;
         }
         return false;
     }
 
+    void OnPostCameraCulling(ref CullingResults cullingResults)
+    {
+        var lightData = _deferredLightConfigurator.Prepare(ref cullingResults);
+    }
+    
     void DrawVisibleGeometry(bool useDynamicBatching,bool useGPUInstancing, bool useLightsPerObject)
     {
         PerObjectData lightsPerObjectFlags =

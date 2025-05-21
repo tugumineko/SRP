@@ -43,14 +43,14 @@ MonoBehaviour:
   toneMapping:
     mode: 1
   bloom:
-    maxIterations: 0
+    maxIterations: 1
     downscaleLimit: 1
     bicubicUpsampling: 1
     threshold: 0.5
     thresholdKnee: 0.458
     intensity: 0.5
     fadeFireflies: 1
-    mode: 0
+    mode: 1
     scatter: 0.7
   reduceColor:
     discreteLevel: 14
