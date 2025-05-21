@@ -17,7 +17,7 @@ MonoBehaviour:
   useGPUInstancing: 1
   useSRPBatcher: 1
   useLightsPerObject: 1
-  shadowSettings:
+  _shadowSettings:
     maxDistance: 100
     distanceFade: 0.1
     directional:
@@ -32,5 +32,11 @@ MonoBehaviour:
     other:
       atlasSize: 1024
       filter: 0
-  postFXSettings: {fileID: 11400000, guid: a2674fbf7b2efc643b3bd33ee93f4298, type: 2}
-  colorLUTResolution: 16
+  _postFXSettings: {fileID: 11400000, guid: a2674fbf7b2efc643b3bd33ee93f4298, type: 2}
+  _colorLUTResolution: 32
+  _renderPath: 0
+  _deferredSettings:
+    _frameBufferOutputDebug: 0
+    lightShaderByComputeShader: 1
+    tileLightCullingAlgorithm: 0
+    enableDepthSliceForLightCulling: 1

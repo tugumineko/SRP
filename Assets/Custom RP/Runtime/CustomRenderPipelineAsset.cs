@@ -1,5 +1,12 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+
+public enum RenderPath
+{
+    Forward,
+    Deferred
+};
 
 [CreateAssetMenu(menuName = "Rendering/Custom Render Pipeline")]
 public class CustomRenderPipelineAsset : RenderPipelineAsset
@@ -12,20 +19,32 @@ public class CustomRenderPipelineAsset : RenderPipelineAsset
         useLightsPerObject = true;
     
     [SerializeField]
-    public ShadowSettings shadowSettings = default;
+    private ShadowSettings _shadowSettings = default;
     
     [SerializeField] 
-    public PostFXSettings postFXSettings = default;
+    private PostFXSettings _postFXSettings = default;
     
     public enum ColorLUTResolution { _16 = 16, _32 = 32, _64 = 64 }
     
     [SerializeField]
-    public ColorLUTResolution colorLUTResolution = ColorLUTResolution._32;
+    private ColorLUTResolution _colorLUTResolution = ColorLUTResolution._32;
+    
+    [SerializeField]
+    private RenderPath _renderPath = RenderPath.Forward;
+    
+    [SerializeField]
+    private DeferredRPSettings _deferredSettings = new DeferredRPSettings();
     
     protected override RenderPipeline CreatePipeline()
     {
         return new CustomRenderPipeline(this);
     }
+    
+    public ShadowSettings shadowSettings => _shadowSettings;
+    public PostFXSettings postFXSettings => _postFXSettings;
+    public ColorLUTResolution colorLUTResolution => _colorLUTResolution;
+    public RenderPath renderPath => _renderPath;
+    public DeferredRPSettings deferredSettings => _deferredSettings;
     
 }
 
