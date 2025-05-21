@@ -411,7 +411,7 @@ float4 ColorGradingNonePassFragment(Varyings input) : SV_TARGET
 }
 
 float4 ColorGradingACESPassFragment(Varyings input) : SV_TARGET {
-    float3 color = GetColorGradedLUT(input.screenUV);
+    float3 color = GetColorGradedLUT(input.screenUV,true);
     color = AcesTonemap(color);
     return float4(color,1.0);
 }
@@ -434,7 +434,7 @@ float3 ApplyColorGradingLUT(float3 color)
 {
     return ApplyLut2D(
         TEXTURE2D_ARGS(_ColorGradingLUT, sampler_linear_clamp),
-        saturate(_ColorGradingLUTInLogC ? LogCToLinear(color) : color),
+        saturate(_ColorGradingLUTInLogC ? LinearToLogC(color) : color),
         _ColorGradingLUTParameters.xyz
     );
 }

@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 [CreateAssetMenu(menuName = "Rendering/Custom Render Pipeline")]
 public class CustomRenderPipelineAsset : RenderPipelineAsset
 {
-    [SerializeField] private bool
+    [SerializeField] public bool
         allowHDR = true,
         useDynamicBatching = true,
         useGPUInstancing = true,
@@ -12,20 +12,19 @@ public class CustomRenderPipelineAsset : RenderPipelineAsset
         useLightsPerObject = true;
     
     [SerializeField]
-    ShadowSettings shadows = default;
+    public ShadowSettings shadowSettings = default;
     
-    [SerializeField]
-    PostFXSettings postFXSettings = default;
+    [SerializeField] 
+    public PostFXSettings postFXSettings = default;
     
     public enum ColorLUTResolution { _16 = 16, _32 = 32, _64 = 64 }
     
     [SerializeField]
-    ColorLUTResolution colorLUTResolution = ColorLUTResolution._32;
+    public ColorLUTResolution colorLUTResolution = ColorLUTResolution._32;
     
     protected override RenderPipeline CreatePipeline()
     {
-        return new CustomRenderPipeline(allowHDR,useDynamicBatching, useGPUInstancing,useSRPBatcher,
-            useLightsPerObject,shadows,postFXSettings, (int)colorLUTResolution);
+        return new CustomRenderPipeline(this);
     }
     
 }

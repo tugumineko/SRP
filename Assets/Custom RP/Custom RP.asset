@@ -12,25 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569173c16d41c1a469a191f36ff4cd74, type: 3}
   m_Name: Custom RP
   m_EditorClassIdentifier: 
-  allowHDR: 0
+  allowHDR: 1
   useDynamicBatching: 1
   useGPUInstancing: 1
   useSRPBatcher: 1
   useLightsPerObject: 1
-  shadows:
-    maxDistance: 10
+  shadowSettings:
+    maxDistance: 100
     distanceFade: 0.1
     directional:
       atlasSize: 1024
-      filter: 3
+      filter: 0
       cascadeCount: 4
-      cascadeRatio1: 0.136
-      cascadeRatio2: 0.267
-      cascadeRatio3: 0.387
+      cascadeRatio1: 0.1
+      cascadeRatio2: 0.25
+      cascadeRatio3: 0.5
       cascadeFade: 0.1
-      cascadeBlend: 2
+      cascadeBlend: 0
     other:
       atlasSize: 1024
-      filter: 3
+      filter: 0
   postFXSettings: {fileID: 11400000, guid: a2674fbf7b2efc643b3bd33ee93f4298, type: 2}
   colorLUTResolution: 16
